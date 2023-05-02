@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protected</title>
+</head>
+<body>
+    <h1>Ruta Protegida</h1>
+    <div id="app">
+        <h2>Email: <p id="email"></p> </h2>
+        <button id="logout">Cerrar sesion</button>
+    </div>
+    
+    <script>
+
+
+        const logout = document.getElementById("logout");
+            logout.addEventListener("click", async () => {
+                const res = await fetch("/api/auth/logout", {
+                    method: "GET",
+                    // headers: {
+                    //     "Content-Type": "application/json",
+                    //     Authorization: "Bearer " + token,
+                    // },
+                    // credentials: "include",
+                });
+                console.log(res);
+            });
+
+        document.addEventListener('DOMContentLoaded', async (e) =>{
+            try {
+
+                const resToken = await fetch('/api/auth/refresh', {
+                    method : "GET",
+                    credentials : "include"
+                })
+
+                const {token} = await resToken.json();
+
+                const res = await fetch('/api/auth/protected', {
+                    method : "GET",
+                    headers : {
+                        "Content-Type" : "application/json",
+                        Authorization : "Bearer " + token,
+                    },
+                    // credentials : 'include'
+                })
+
+                console.log(res.ok, res.status);
+                if(res.ok){
+                    const data = await res.json()
+                    document.getElementById('email').textContent = data.email;
+                    console.log(data);
+                }else{
+                    console.error('Token no válido');
+                }
+                // console.log( data.user.email);
+            } catch (error) {
+                console.log(error);
+            }
+        })
+    </script>
+</body>
+</html>
